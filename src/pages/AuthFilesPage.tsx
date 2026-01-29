@@ -96,7 +96,7 @@ const OAUTH_PROVIDER_PRESETS = [
 
 const OAUTH_PROVIDER_EXCLUDES = new Set(['all', 'unknown', 'empty']);
 const MIN_CARD_PAGE_SIZE = 3;
-const MAX_CARD_PAGE_SIZE = 30;
+const MAX_CARD_PAGE_SIZE = 100;
 const MAX_AUTH_FILE_SIZE = 50 * 1024;
 
 const clampCardPageSize = (value: number) =>
@@ -204,8 +204,8 @@ export function AuthFilesPage() {
   const [filter, setFilter] = useState<'all' | string>('all');
   const [search, setSearch] = useState('');
   const [page, setPage] = useState(1);
-  const [pageSize, setPageSize] = useState(9);
-  const [pageSizeInput, setPageSizeInput] = useState('9');
+  const [pageSize, setPageSize] = useState(100);
+  const [pageSizeInput, setPageSizeInput] = useState('100');
   const [uploading, setUploading] = useState(false);
   const [deleting, setDeleting] = useState<string | null>(null);
   const [deletingAll, setDeletingAll] = useState(false);
