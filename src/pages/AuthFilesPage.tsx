@@ -209,6 +209,7 @@ export function AuthFilesPage() {
   const [uploading, setUploading] = useState(false);
   const [deleting, setDeleting] = useState<string | null>(null);
   const [deletingAll, setDeletingAll] = useState(false);
+  const [exporting, setExporting] = useState(false);
   const [statusUpdating, setStatusUpdating] = useState<Record<string, boolean>>({});
   const [keyStats, setKeyStats] = useState<KeyStats>({ bySource: {}, byAuthIndex: {} });
   const [usageDetails, setUsageDetails] = useState<UsageDetail[]>([]);
@@ -824,6 +825,56 @@ export function AuthFilesPage() {
     } catch (err: unknown) {
       const errorMessage = err instanceof Error ? err.message : '';
       showNotification(`${t('notification.download_failed')}: ${errorMessage}`, 'error');
+    }
+  };
+
+  // 导出全部文件
+  const handleExportAll = async () => {
+    if (files.length === 0) {
+      showNotification(t('auth_files.export_empty'), 'warning');
+      return;
+    }
+
+    setExporting(true);
+    try {
+      const allContents: Record<string, unknown> = {};
+      let successCount = 0;
+      let failCount = 0;
+
+      for (const file of files) {
+        try {
+          const text = await authFilesApi.downloadText(file.name);
+          const parsed = JSON.parse(text);
+          allContents[file.name] = parsed;
+          successCount++;
+        } catch {
+          failCount++;
+        }
+      }
+
+      if (successCount === 0) {
+        showNotification(t('auth_files.export_all_failed'), 'error');
+        return;
+      }
+
+      const blob = new Blob([JSON.stringify(allContents, null, 2)], { type: 'application/json' });
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `auth-files-export-${new Date().toISOString().slice(0, 10)}.json`;
+      a.click();
+      window.URL.revokeObjectURL(url);
+
+      if (failCount > 0) {
+        showNotification(t('auth_files.export_partial', { success: successCount, failed: failCount }), 'warning');
+      } else {
+        showNotification(t('auth_files.export_success', { count: successCount }), 'success');
+      }
+    } catch (err: unknown) {
+      const errorMessage = err instanceof Error ? err.message : '';
+      showNotification(`${t('auth_files.export_failed')}: ${errorMessage}`, 'error');
+    } finally {
+      setExporting(false);
     }
   };
 
@@ -1503,6 +1554,15 @@ export function AuthFilesPage() {
           <div className={styles.headerActions}>
             <Button variant="secondary" size="sm" onClick={handleHeaderRefresh} disabled={loading}>
               {t('common.refresh')}
+            </Button>
+            <Button
+              variant="secondary"
+              size="sm"
+              onClick={handleExportAll}
+              disabled={disableControls || loading || exporting || files.length === 0}
+              loading={exporting}
+            >
+              {t('auth_files.export_all_button')}
             </Button>
             <Button
               size="sm"
