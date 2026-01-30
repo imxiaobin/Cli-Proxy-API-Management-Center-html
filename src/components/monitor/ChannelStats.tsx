@@ -88,12 +88,13 @@ export function ChannelStats({ data, loading, providerMap, providerModels }: Cha
       Object.entries(apiData.models).forEach(([modelName, modelData]) => {
         modelData.details.forEach((detail) => {
           const source = detail.source || 'unknown';
+          // 跳过无效的 source
+          if (!source || source === '-' || source === 'unknown') return;
+
           // 获取渠道显示信息
           const { provider, masked } = getProviderDisplayParts(source, providerMap);
-          // 只统计在 providerMap 中存在的渠道
-          if (!provider) return;
-
-          const displayName = `${provider} (${masked})`;
+          // 即使没有匹配到 provider，也显示数据（使用 masked key）
+          const displayName = provider ? `${provider} (${masked})` : masked;
           const timestamp = detail.timestamp ? new Date(detail.timestamp).getTime() : 0;
 
           if (!stats[displayName]) {

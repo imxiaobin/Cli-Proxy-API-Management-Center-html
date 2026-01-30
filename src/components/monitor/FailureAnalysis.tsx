@@ -84,8 +84,8 @@ export function FailureAnalysis({ data, loading, providerMap, providerModels }: 
         modelData.details.forEach((detail) => {
           if (detail.failed) {
             const source = detail.source || 'unknown';
-            const { provider } = getProviderDisplayParts(source, providerMap);
-            if (provider) {
+            // 跳过无效的 source，但不再要求必须匹配 providerMap
+            if (source && source !== '-' && source !== 'unknown') {
               failedSources.add(source);
             }
           }
