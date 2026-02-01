@@ -1450,6 +1450,11 @@ export function AuthFilesPage() {
           </span>
         </div>
 
+        {/* status_message 显示 */}
+        {item.status_message && (
+          <div className={styles.statusMessage}>{item.status_message}</div>
+        )}
+
         {/* 状态监测栏 */}
         {renderStatusBar(item)}
 

@@ -25,6 +25,7 @@ export interface AuthFileItem {
   runtimeOnly?: boolean | string;
   disabled?: boolean;
   modified?: number;
+  status_message?: string;
   [key: string]: any;
 }
 
